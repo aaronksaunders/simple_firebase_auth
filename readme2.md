@@ -126,6 +126,58 @@ Lets add some spacing between the fields in the column so it is more presentable
 #### Getting Text Values from Form Fields
 We are going to be using a `Form` widget and a `GlobalKey`, additional information on these concepts can be found in the flutter cookbook section [Building a form with validation](https://flutter.dev/docs/cookbook/forms/validation)
 
+Add the formKey in the `LoginPage` widget
+```javascript
+class _LoginPageState extends State<LoginPage> {
+  final _formKey = GlobalKey<FormState>();
+```
+Then add two new fields to hold the email address and password values we will need to send to Firebase for authentication
+```javascript
+class _LoginPageState extends State<LoginPage> {
+  final _formKey = GlobalKey<FormState>();
+  String _password;
+  String _email;
+```
+Next we add a property `onSaved` to the `TextFormFields` we have for email and password, when the `save` method is called on the form, all of the widgets onSaved methods will be called to update the local variables.
+```javascript
+  TextFormField(
+      onSaved: (value) => _email = value,    // <= NEW
+      keyboardType: TextInputType.emailAddress,
+      decoration: InputDecoration(labelText: "Email Address")),
+  TextFormField(
+      onSaved: (value) => _password = value, // <= NEW
+      keyboardType: TextInputType.emailAddress,
+      obscureText: true,
+      decoration: InputDecoration(labelText: "Password")),
+```
+Wrap the `Column` Widget with a new `Form` Widget, the code should look similar to this
+```javascript
+      body: Container(
+        padding: EdgeInsets.all(20.0),
+        child: Form(          // <= NEW
+          key: _formKey,      // <= NEW
+          child: Column(
+            children: <Widget>[
+            ....
+            ],
+          ),
+        ),
+      ),            
+```
+Now that the fields are set, the `TextFormField` are updated, we can using the `_formKey` to not only validate the fields provided, but to also get the values locally by calling the `save` method.
+
+Replace the code in the `RaisedButton` `onPressed` method
+```javascript
+    // save the fields..
+    final form = _formKey.currentState;
+    form.save();
+
+    // Validate will return true if is valid, or false if invalid.
+    if (form.validate()) {
+      print("$_email $_password");
+    }
+```
+
 
 ### Create the HomePage Widget
 For now, we will keep the home page simple since we are just trying to demonstrate how the flow works. Ignore the commented out `LogoutButton` widget, we will discuss that in a later section of the tutorial.
