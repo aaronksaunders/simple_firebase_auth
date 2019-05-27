@@ -163,7 +163,8 @@ Wrap the `Column` Widget with a new `Form` Widget, the code should look similar 
 ```
 Now that the fields are set, the `TextFormField` are updated, we can using the `_formKey` to not only validate the fields provided, but to also get the values locally by calling the `save` method.
 
-Replace the code in the `RaisedButton` `onPressed` method
+Replace the code in the `RaisedButton` `onPressed` method to the following, and you will see that we are getting the values for email and password set in out widget. We can now pass these values to the `AuthService` that wraps the Firebase signin functionality.
+
 ```javascript
     // save the fields..
     final form = _formKey.currentState;
