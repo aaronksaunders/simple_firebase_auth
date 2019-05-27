@@ -95,7 +95,6 @@ Next add the actual form field widgets and the buttons as children of the `Colum
             keyboardType: TextInputType.emailAddress,
             decoration: InputDecoration(labelText: "Email Address")),
         TextFormField(
-            keyboardType: TextInputType.emailAddress,
             obscureText: true,
             decoration: InputDecoration(labelText: "Password")),
         RaisedButton(child: Text("LOGIN"), onPressed: () {}),
@@ -116,7 +115,6 @@ Lets add some spacing between the fields in the column so it is more presentable
         keyboardType: TextInputType.emailAddress,
         decoration: InputDecoration(labelText: "Email Address")),
     TextFormField(
-        keyboardType: TextInputType.emailAddress,
         obscureText: true,
         decoration: InputDecoration(labelText: "Password")),
     SizedBox(height: 20.0),  // <= NEW
@@ -146,7 +144,6 @@ Next we add a property `onSaved` to the `TextFormFields` we have for email and p
       decoration: InputDecoration(labelText: "Email Address")),
   TextFormField(
       onSaved: (value) => _password = value, // <= NEW
-      keyboardType: TextInputType.emailAddress,
       obscureText: true,
       decoration: InputDecoration(labelText: "Password")),
 ```
