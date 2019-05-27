@@ -5,9 +5,8 @@ class LoginPage extends StatefulWidget {
   _LoginPageState createState() => _LoginPageState();
 }
 
-final _formKey = GlobalKey<FormState>();
-
 class _LoginPageState extends State<LoginPage> {
+  final _formKey = GlobalKey<FormState>();
   String _password;
   String _email;
 
@@ -35,7 +34,6 @@ class _LoginPageState extends State<LoginPage> {
                   decoration: InputDecoration(labelText: "Email Address")),
               TextFormField(
                   onSaved: (value) => _password = value,
-                  keyboardType: TextInputType.emailAddress,
                   obscureText: true,
                   decoration: InputDecoration(labelText: "Password")),
               SizedBox(height: 20.0),
