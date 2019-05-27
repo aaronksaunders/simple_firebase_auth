@@ -1,5 +1,6 @@
 # Simple Firebase Login Flow in Flutter
----
+
+
 There are plenty of examples online about setting up Firebase for Flutter so I will jump right into the code instead of walking thru the basics. 
 
 >See [Google CodeLabs Flutter for Firebase](https://codelabs.developers.google.com/codelabs/flutter-firebase/index.html?index=..%2F..index#5) for step by step instructions for setting up you project on iOS or Android
