@@ -11,8 +11,31 @@ first lets create the project
 ```
 flutter create simple_firebase_auth
 ```
-Now lets do some project cleanup, open up the project and delete the existing `HomePage` and `HomePageState` widget from the file `main.dart`
+Now lets do some project cleanup, open up the project and delete the existing `HomePage` and `HomePageState` widget from the file `main.dart`.
 
+Change the `home` property of the `MaterialApp` widget to point to the `LoginPage` widget we are about to create in the next section
+
+The file should look similar to this when completed
+```javascript
+import 'package:flutter/material.dart';
+import 'package:simple_firebase_auth/login_page.dart';
+
+void main() => runApp(MyApp());
+
+class MyApp extends StatelessWidget {
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: LoginPage(),
+    );
+  }
+}
+```
 
 
 ### Create the LoginPage Widget
@@ -45,9 +68,9 @@ class _LoginPageState extends State<LoginPage> {
 }
 
 ```
-you should be able to run the code to see what the screen looks like now. You might want to change the default route or `home` property in `main.dart` widget to `LoginPage` while we work through the UI so you can see the changes with live reload
+you should be able to run the code to see what the screen looks like now. Be sure to change the default route or `home` property in `main.dart` widget to `LoginPage` while we work through the UI so you can see the changes with live reload
 
-##### Style and Adding Text Fields
+#### Style and Adding Text Fields
 
 Lets make the body of the page a centered `Column` with the childre of the column being primarily the `TextFormField`s and the `RaisedButton`
 
@@ -58,7 +81,7 @@ the centered container to hold the form fields and buttons
       child: Column()
     )
 ```
-Next add the actual form field widgets and the buttons
+Next add the actual form field widgets and the buttons as children of the `Column` widget. We will do some basic styling of the form fields so that this looks presentable. See the Flutter documentation for more information on [TextFormFields](https://api.flutter.dev/flutter/material/TextFormField-class.html)
 ```javascript
   body: Container(
     padding: EdgeInsets.all(20.0),
@@ -79,6 +102,26 @@ Next add the actual form field widgets and the buttons
       ],
     ),
   ),
+```
+Lets add some spacing between the fields in the column so it is more presentable. We are going to use the `SizedBox` widget and set the `height` property to get some spacing in the application. Replace the `children` property of the `Column` widget to get the desired spacing
+```javascript
+  children: <Widget>[
+    SizedBox(height: 20.0),
+    Text(
+      'Login Information',
+      style: TextStyle(fontSize: 20),
+    ),
+    SizedBox(height: 20.0),
+    TextFormField(
+        keyboardType: TextInputType.emailAddress,
+        decoration: InputDecoration(labelText: "Email Address")),
+    TextFormField(
+        keyboardType: TextInputType.emailAddress,
+        obscureText: true,
+        decoration: InputDecoration(labelText: "Password")),
+    SizedBox(height: 20.0),
+    RaisedButton(child: Text("LOGIN"), onPressed: () {}),
+  ],
 ```
 ### Create the HomePage Widget
 For now, we will keep the home page simple since we are just trying to demonstrate how the flow works. Ignore the commented out `LogoutButton` widget, we will discuss that in a later section of the tutorial.
