@@ -124,6 +124,8 @@ Lets add some spacing between the fields in the column so it is more presentable
   ],
 ```
 #### Getting Text Values from Form Fields
+We are going to be using a `Form` widget and a `GlobalKey`, additional information on these concepts can be found in the flutter cookbook section [Building a form with validation](https://flutter.dev/docs/cookbook/forms/validation)
+
 
 ### Create the HomePage Widget
 For now, we will keep the home page simple since we are just trying to demonstrate how the flow works. Ignore the commented out `LogoutButton` widget, we will discuss that in a later section of the tutorial.
