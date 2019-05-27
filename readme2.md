@@ -7,83 +7,13 @@ Since we are just building the application and there is no functionalty to creat
 
 
 ### Cleaning Up the Default Flutter Project
-
+first lets create the project
 ```
 flutter create simple_firebase_auth
 ```
-1. open up the project and delete the existing `HomePage` and `HomePageState` widget
-1. open up the project and delete the existing `HomePage` and `HomePageState` widget
+Now lets do some project cleanup, open up the project and delete the existing `HomePage` and `HomePageState` widget from the file `main.dart`
 
 
-### Determining a User On Application Launch
-The first challange when working with the application is to determine which page to open when the application starts up. What we want to do here is determine if we have a user or not. We will be using the `AuthService` we just created combined with the `FutureBuilder` widget from flutter to render the correct first page of either a `HomePage` or a `LoginPage`
-
-Go into the `main.dart` file in your project and make the following changes to the main widget of your application. Replace the `home` property on
-
-```javascript
-home: FutureBuilder<FirebaseUser>(
-    // using the function from the service to get a user id there
-    // is one.
-    future: AuthService().getUser,
-
-    // we will build the next widget based on if there is a user
-    // of not returned from the call to the AuthService
-    builder: (context, AsyncSnapshot<FirebaseUser> snapshot) {
-        // when the Future is completed, check to see if we got data
-        if (snapshot.connectionState == ConnectionState.done) {
-           final bool loggedIn = snapshot.hasData;
-
-           // if we got data, then render the HomePage, otherwise
-           // render the login page
-           return loggedIn ? HomePage() : LoginPage();
-        } else {
-           // if we are not done yet with the Future, load a spinner
-           return LoadingCircle();
-        }
-    }),
-```
-
-### Authentication Service Wrapping Firebase Functionality
-
-First the authentication service which is where we are just wrapping some of the basic firebase functions that we need for authentication and determining if there is already a user persisted from a previous session
-
-```dart
-import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:async';
-
-class AuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  // return the Future with firebase user if one exists
-  Future<FirebaseUser> get getUser => _auth.currentUser();
-
-  // wrapping the firebase calls
-  Future logout() {
-    return FirebaseAuth.instance.signOut();
-  }
-
-  // wrapping the firebase calls
-  Future createUser(
-      {String firstName,
-      String lastName,
-      String email,
-      String password}) async {
-    var u = await FirebaseAuth.instance
-        .createUserWithEmailAndPassword(email: email, password: password);
-
-    UserUpdateInfo info = UserUpdateInfo();
-    info.displayName = '$firstName $lastName';
-    return await u.updateProfile(info);
-  }
-
-  // wrapping the firebase calls
-  Future<FirebaseUser> loginUser({String email, String password}) {
-    return FirebaseAuth.instance
-        .signInWithEmailAndPassword(email: email, password: password);
-  }
-}
-
-```
 
 ### Create the LoginPage Widget
 Lets walk through the creation of the `LoginPage` for the application. We need capture an `email` and a `password` to pass to the `AuthService` to call the login function.
@@ -192,3 +122,75 @@ home: HomePage(title: 'Flutter Demo Home Page'),
 home: HomePage(),
 ```
 
+
+
+
+### Determining a User On Application Launch
+The first challange when working with the application is to determine which page to open when the application starts up. What we want to do here is determine if we have a user or not. We will be using an `AuthService` we will create later combined with the `FutureBuilder` widget from flutter to render the correct first page of either a `HomePage` or a `LoginPage`
+
+Go into the `main.dart` file in your project and make the following changes to the main widget of your application. Replace the `home` property on
+
+```javascript
+home: FutureBuilder<FirebaseUser>(
+    // using the function from the service to get a user id there
+    // is one.
+    future: AuthService().getUser,
+
+    // we will build the next widget based on if there is a user
+    // of not returned from the call to the AuthService
+    builder: (context, AsyncSnapshot<FirebaseUser> snapshot) {
+        // when the Future is completed, check to see if we got data
+        if (snapshot.connectionState == ConnectionState.done) {
+           final bool loggedIn = snapshot.hasData;
+
+           // if we got data, then render the HomePage, otherwise
+           // render the login page
+           return loggedIn ? HomePage() : LoginPage();
+        } else {
+           // if we are not done yet with the Future, load a spinner
+           return LoadingCircle();
+        }
+    }),
+```
+
+### Authentication Service Wrapping Firebase Functionality
+
+First the authentication service which is where we are just wrapping some of the basic firebase functions that we need for authentication and determining if there is already a user persisted from a previous session
+
+```dart
+import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:async';
+
+class AuthService {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  // return the Future with firebase user if one exists
+  Future<FirebaseUser> get getUser => _auth.currentUser();
+
+  // wrapping the firebase calls
+  Future logout() {
+    return FirebaseAuth.instance.signOut();
+  }
+
+  // wrapping the firebase calls
+  Future createUser(
+      {String firstName,
+      String lastName,
+      String email,
+      String password}) async {
+    var u = await FirebaseAuth.instance
+        .createUserWithEmailAndPassword(email: email, password: password);
+
+    UserUpdateInfo info = UserUpdateInfo();
+    info.displayName = '$firstName $lastName';
+    return await u.updateProfile(info);
+  }
+
+  // wrapping the firebase calls
+  Future<FirebaseUser> loginUser({String email, String password}) {
+    return FirebaseAuth.instance
+        .signInWithEmailAndPassword(email: email, password: password);
+  }
+}
+
+```
