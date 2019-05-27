@@ -106,12 +106,12 @@ Next add the actual form field widgets and the buttons as children of the `Colum
 Lets add some spacing between the fields in the column so it is more presentable. We are going to use the `SizedBox` widget and set the `height` property to get some spacing in the application. Replace the `children` property of the `Column` widget to get the desired spacing
 ```javascript
   children: <Widget>[
-    SizedBox(height: 20.0),
+    SizedBox(height: 20.0),    // <= NEW
     Text(
       'Login Information',
       style: TextStyle(fontSize: 20),
     ),
-    SizedBox(height: 20.0),
+    SizedBox(height: 20.0),   // <= NEW
     TextFormField(
         keyboardType: TextInputType.emailAddress,
         decoration: InputDecoration(labelText: "Email Address")),
@@ -119,10 +119,12 @@ Lets add some spacing between the fields in the column so it is more presentable
         keyboardType: TextInputType.emailAddress,
         obscureText: true,
         decoration: InputDecoration(labelText: "Password")),
-    SizedBox(height: 20.0),
+    SizedBox(height: 20.0),  // <= NEW
     RaisedButton(child: Text("LOGIN"), onPressed: () {}),
   ],
 ```
+#### Getting Text Values from Form Fields
+
 ### Create the HomePage Widget
 For now, we will keep the home page simple since we are just trying to demonstrate how the flow works. Ignore the commented out `LogoutButton` widget, we will discuss that in a later section of the tutorial.
 
