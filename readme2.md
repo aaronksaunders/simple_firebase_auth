@@ -1,9 +1,18 @@
 # Simple Firebase Login Flow in Flutter
 
+We will create a simple application with the following components
+- Default Main App Entry Point
+  - Use of [FutureBuilder Widget](https://api.flutter.dev/flutter/widgets/FutureBuilder-class.html
+  ) to wait for data before rendering UI, concept used throughout the app
+- Login Page
+- Home Page
+- Authentication Service 
+  - Demonstrate the use of the Provider as discussed here in the Flutter Documentation [Simple App State Management](https://flutter.dev/docs/development/data-and-backend/state-mgmt/simple#accessing-the-state)
 
 There are plenty of examples online about setting up Firebase for Flutter so I will jump right into the code instead of walking thru the basics. 
 
 >See [Google CodeLabs Flutter for Firebase](https://codelabs.developers.google.com/codelabs/flutter-firebase/index.html?index=..%2F..index#5) for step by step instructions for setting up you project on iOS or Android
+
 
 ### Create a Test User in Firebase
 Since we are just building the application and there is no functionalty to create users in the application right now, please login to you Firebase Console and add an user to your project. Please be sure to enable email authentication when updating the project in your Firebase Console.
@@ -217,12 +226,49 @@ import 'home_page.dart';
 ```javascript
 home: HomePage(title: 'Flutter Demo Home Page'),
 ```
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to this
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to this so you can verify that the page is working properly
 ```javascript
 home: HomePage(),
 ```
+### Creating a Template for An Authentication Service
+Here we will build out the authentication service seperate from Firebase, validate that everything works and then integrate Firebase.
 
+What we need as a baseline is the following:
+```javascript
+import 'dart:async';
 
+class AuthService {
+  var currentUser;
+
+  AuthService() {
+    print("new AuthService");
+  }
+
+  // gets the current user if there is one
+  Future getUser() {
+    return Future.value(currentUser);
+  }
+
+  // clears the current user
+  Future logout() {
+    this.currentUser =  null;
+    return Future.value(currentUser);
+  }
+
+  // logs in the user if password matches
+  Future loginUser({String email, String password}) {
+    if ( password == 'password123') {
+       this.currentUser =  {'email': email};
+       return Future.value(currentUser);
+    } else {
+        this.currentUser = null;
+       return Future.value(null);
+    }
+  }
+}
+
+```
+We will keep a local property in the service of the `currentUser` object, when the user calls the `login` method, if the password matches we will set current user and the user will be logged in. This will now provide a user when the call is made to `getUser` method. For logging the user out, we will set the `currentUser`property to null.
 
 
 ### Determining a User On Application Launch
@@ -231,7 +277,7 @@ The first challange when working with the application is to determine which page
 Go into the `main.dart` file in your project and make the following changes to the main widget of your application. Replace the `home` property on
 
 ```javascript
-home: FutureBuilder<FirebaseUser>(
+home: FutureBuilder<dynamic>(
     // using the function from the service to get a user id there
     // is one.
     future: AuthService().getUser,
