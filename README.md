@@ -1,6 +1,6 @@
 # simple_firebase_auth
 
-A new Flutter project.
+Click here to view read me with step by step instructions [Documentation](https://github.com/aaronksaunders/simple_firebase_auth/blob/master/readme2.md)
 
 ## Getting Started
 
