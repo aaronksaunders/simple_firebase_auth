@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'auth.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -14,7 +17,19 @@ class _HomePageState extends State<HomePage> {
         //actions: <Widget>[LogoutButton()],
       ),
       body: Center(
-        child: Text('Home Page Flutter Firebase  Content'),
+        child: Column(
+          children: <Widget>[
+            Text('Home Page Flutter Firebase  Content'),
+            SizedBox(height: 20.0),
+            RaisedButton(
+                child: Text("LOGOUT"),
+                onPressed: () async {
+                  await Provider.of<AuthService>(context).logout();
+
+                  Navigator.pushReplacementNamed(context, "/");
+                })
+          ],
+        ),
       ),
     );
   }

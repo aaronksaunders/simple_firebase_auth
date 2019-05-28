@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'auth.dart';
+
 
 class LoginPage extends StatefulWidget {
   @override
@@ -39,14 +42,17 @@ class _LoginPageState extends State<LoginPage> {
               SizedBox(height: 20.0),
               RaisedButton(
                   child: Text("LOGIN"),
-                  onPressed: () {
+                  onPressed: () async {
                     // save the fields..
                     final form = _formKey.currentState;
                     form.save();
 
                     // Validate will return true if is valid, or false if invalid.
                     if (form.validate()) {
-                      print("$_email $_password");
+                      await Provider.of<AuthService>(context)
+                          .loginUser(email: _email, password: _password);
+
+                      Navigator.pushReplacementNamed(context, "/");
                     }
                   }),
             ],
