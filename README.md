@@ -1,6 +1,6 @@
-# simple_firebase_auth
+# Simple Firebase Login Flow in Flutter
 
-Click here to view read me with step by step instructions [Documentation](https://github.com/aaronksaunders/simple_firebase_auth/blob/master/readme2.md)
+Click here to view read me with step by step instructions [Documentation for Simple Firebase Login Flow in Flutter](https://github.com/aaronksaunders/simple_firebase_auth/blob/master/readme2.md)
 
 ## Getting Started
 
