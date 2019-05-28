@@ -13,7 +13,7 @@ class AuthService {
 
   // wrappinhg the firebase calls
   Future logout() {
-    this.currentUser =  null;
+    this.currentUser = null;
     return Future.value(currentUser);
   }
 
@@ -24,9 +24,14 @@ class AuthService {
       String email,
       String password}) async {}
 
-  // wrappinhg the firebase calls
+  // logs in the user if password matches
   Future loginUser({String email, String password}) {
-    this.currentUser =  {'email': email};
-    return Future.value(currentUser);
+    if (password == 'password123') {
+      this.currentUser = {'email': email};
+      return Future.value(currentUser);
+    } else {
+      this.currentUser = null;
+      return Future.value(null);
+    }
   }
 }
