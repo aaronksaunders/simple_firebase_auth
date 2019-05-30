@@ -50,7 +50,7 @@ class _LoginPageState extends State<LoginPage> {
                           var result = await Provider.of<AuthService>(context)
                               .loginUser(email: _email, password: _password);
                           if (result != null) {
-                            Navigator.pushReplacementNamed(context, "/");
+                            //Navigator.pushReplacementNamed(context, "/");
                           } else {
                             return _buildShowErrorDialog(context,
                                 "Error Logging In With Those Credentials");
