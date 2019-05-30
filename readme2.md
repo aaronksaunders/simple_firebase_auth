@@ -231,72 +231,102 @@ home: HomePage(title: 'Flutter Demo Home Page'),
 home: HomePage(),
 ```
 ### Creating a Template for An Authentication Service
-Here we will build out the authentication service seperate from Firebase, validate that everything works and then integrate Firebase.
+Here we will build out the authentication service separate from Firebase, validate that everything works and then integrate Firebase.
+
+In this service, we are using a mixin called `ChangeNotifier` and a method `notifyListeners`	 this will allow for the widgets that are using this Service to be updated when the method is called. We are calling  `notifyListeners`	 when we update the `currentUser` property because that means that the user has either logged in or logged out and we want the application to update based on the users state.
+
+>More information on `Provider` and State Management can be found here in the [Flutter Documentation]([https://flutter.dev/docs/development/data-and-backend/state-mgmt/simple](https://flutter.dev/docs/development/data-and-backend/state-mgmt/simple))
 
 What we need as a baseline is the following:
 ```javascript
 import 'dart:async';
+import 'package:flutter/material.dart';
 
-class AuthService {
+class AuthService with ChangeNotifier {
   var currentUser;
 
   AuthService() {
     print("new AuthService");
   }
 
-  // gets the current user if there is one
   Future getUser() {
     return Future.value(currentUser);
   }
 
-  // clears the current user
+  // wrappinhg the firebase calls
   Future logout() {
-    this.currentUser =  null;
+    this.currentUser = null;
+    notifyListeners();
     return Future.value(currentUser);
   }
 
+  // wrapping the firebase calls
+  Future createUser(
+      {String firstName,
+      String lastName,
+      String email,
+      String password}) async {}
+
   // logs in the user if password matches
   Future loginUser({String email, String password}) {
-    if ( password == 'password123') {
-       this.currentUser =  {'email': email};
-       return Future.value(currentUser);
+    if (password == 'password123') {
+      this.currentUser = {'email': email};
+      notifyListeners();
+      return Future.value(currentUser);
     } else {
-        this.currentUser = null;
-       return Future.value(null);
+      this.currentUser = null;
+      return Future.value(null);
     }
   }
 }
-
 ```
-We will keep a local property in the service of the `currentUser` object, when the user calls the `login` method, if the password matches we will set current user and the user will be logged in. This will now provide a user when the call is made to `getUser` method. For logging the user out, we will set the `currentUser`property to null.
+We will keep a local property in the service call `currentUser` which is the object storing the user, when the user calls the `login` method, if the password matches we will set  `currentUser`  and the user will be logged in. This will now provide a user when the call is made to `getUser` method. For logging the user out, we will set the `currentUser`property to null indicating that we are no longer logged into the system.
 
 
-### Determining a User On Application Launch
-The first challange when working with the application is to determine which page to open when the application starts up. What we want to do here is determine if we have a user or not. We will be using an `AuthService` we will create later combined with the `FutureBuilder` widget from flutter to render the correct first page of either a `HomePage` or a `LoginPage`
+### Determining User State On Application Launch
+The first challenge when working with the application is to determine which page to open when the application starts up. What we want to do here is determine if we have a user or not. We will be using an `AuthService` we will created above combined with the `FutureBuilder` widget from flutter to render the correct first page of either a `HomePage` or a `LoginPage`
 
-Go into the `main.dart` file in your project and make the following changes to the main widget of your application. Replace the `home` property on
+#### Using the Provider
+In `main.dart` we will need to update the default `main` method to look like this; we are wrapping the whole application with the `ChangeNotifierProvider`  to get the ability to scan up the widget tree and find an object of type `AuthService`.
 
 ```javascript
-home: FutureBuilder<dynamic>(
-    // using the function from the service to get a user id there
-    // is one.
-    future: AuthService().getUser,
+void main() => runApp(
+      ChangeNotifierProvider<AuthService>(
+        child: MyApp(),
+        builder: (BuildContext context) {
+          return AuthService();
+        },
+      ),
+    );
+ ```
+ 
+#### Modifying the  MyApp Widget
+Go into the `main.dart`  and make the following changes that will allow the `MyApp` Widget to set the route. This widget will determine if the application should navigate to the 	`HomePage` widget or `LoginPage` widget when the app is launched.
 
-    // we will build the next widget based on if there is a user
-    // of not returned from the call to the AuthService
-    builder: (context, AsyncSnapshot<FirebaseUser> snapshot) {
-        // when the Future is completed, check to see if we got data
-        if (snapshot.connectionState == ConnectionState.done) {
-           final bool loggedIn = snapshot.hasData;
-
-           // if we got data, then render the HomePage, otherwise
-           // render the login page
-           return loggedIn ? HomePage() : LoginPage();
-        } else {
-           // if we are not done yet with the Future, load a spinner
-           return LoadingCircle();
-        }
-    }),
+```javascript
+class MyApp extends StatelessWidget {
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: FutureBuilder(
+        // get the Provider, and call the getUser method
+        future: Provider.of<AuthService>(context).getUser(),
+        // wait for the future to resolve and render the appropriate
+        // widget for HomePage or LoginPage
+        builder: (context, AsyncSnapshot snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return snapshot.hasData ? HomePage() : LoginPage();
+          } else {
+            return Container(color: Colors.white);
+          }
+        },
+      ),
+    );
+  }
+}
 ```
 
 ### Authentication Service Wrapping Firebase Functionality
