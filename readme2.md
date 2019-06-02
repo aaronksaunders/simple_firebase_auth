@@ -329,6 +329,24 @@ class MyApp extends StatelessWidget {
 }
 ```
 
+### Modifying the LoginPage Widget
+Now that the `AuthService` can be accessed using the Provider, we can call the login function when the used clicks the button. Go and open the file `login_page.dart` and find the `onPressed` method for the login button and make the following change
+
+```dart
+    // Validate will return true if is valid, or false if invalid.
+    if (form.validate()) {
+      var result = await Provider.of<AuthService>(context)
+          .loginUser(email: _email, password: _password);
+      if (result == null) {
+        // see project in github for this code
+        //return _buildShowErrorDialog(context,
+        //    "Error Logging In With Those Credentials");
+      }
+    }
+```
+We are using the `Provider.of` method to look up the widget tree and get our `AuthService` and then we have access to all of the methods, specifically the `loginUser` method.
+
+
 ### Authentication Service Wrapping Firebase Functionality
 
 First the authentication service which is where we are just wrapping some of the basic firebase functions that we need for authentication and determining if there is already a user persisted from a previous session
