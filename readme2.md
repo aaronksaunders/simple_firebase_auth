@@ -1,4 +1,4 @@
-# Simple Firebase Login Flow in Flutter
+# Simple Firebase Login Flow in Flutter - Part One
 
 We will create a simple application with the following components
 - Default Main App Entry Point
