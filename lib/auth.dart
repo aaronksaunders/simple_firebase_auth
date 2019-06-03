@@ -1,40 +1,53 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
-import 'package:flutter/material.dart';
+
+import 'package:flutter/cupertino.dart';
 
 class AuthService with ChangeNotifier {
-  var currentUser;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  AuthService() {
-    print("new AuthService");
+  ///
+  /// return the Future with firebase user object FirebaseUser if one exists
+  ///
+  Future<FirebaseUser> getUser() {
+    return _auth.currentUser();
   }
 
-  Future getUser() {
-    return Future.value(currentUser);
-  }
-
-  // wrappinhg the firebase calls
-  Future logout() {
-    this.currentUser = null;
+  // wrapping the firebase calls
+  Future logout() async {
+    var result = FirebaseAuth.instance.signOut();
     notifyListeners();
-    return Future.value(currentUser);
+    return result;
   }
 
-  // wrappinhg the firebase calls
+  // wrapping the firebase calls
   Future createUser(
       {String firstName,
       String lastName,
       String email,
-      String password}) async {}
+      String password}) async {
+    var u = await FirebaseAuth.instance
+        .createUserWithEmailAndPassword(email: email, password: password);
 
-  // logs in the user if password matches
-  Future loginUser({String email, String password}) {
-    if (password == 'password123') {
-      this.currentUser = {'email': email};
+    UserUpdateInfo info = UserUpdateInfo();
+    info.displayName = '$firstName $lastName';
+    return await u.updateProfile(info);
+  }
+
+  ///
+  /// wrapping the firebase call to signInWithEmailAndPassword
+  /// `email` String
+  /// `password` String
+  ///
+  Future<FirebaseUser> loginUser({String email, String password}) async {
+    try {
+      var result = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+      // since something changed, let's notify the listeners...
       notifyListeners();
-      return Future.value(currentUser);
-    } else {
-      this.currentUser = null;
-      return Future.value(null);
+      return result;
+    }  catch (e) {
+      throw new AuthException(e.code, e.message);
     }
   }
 }
