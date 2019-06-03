@@ -1,309 +1,83 @@
-# Simple Firebase Login Flow in Flutter - Part One
+# Simple Firebase Login Flow in Flutter - Part Two
 
-We will create a simple application with the following components
+In part one we created a simple application with the following components
 - Default Main App Entry Point
   - Use of [FutureBuilder Widget](https://api.flutter.dev/flutter/widgets/FutureBuilder-class.html
-  ) to wait for data before rendering UI, concept used throughout the app
+  ) to wait for data before rendering UI, a concept used throughout the app
 - Login Page
 - Home Page
 - Authentication Service 
   - Demonstrate the use of the Provider as discussed here in the Flutter Documentation [Simple App State Management](https://flutter.dev/docs/development/data-and-backend/state-mgmt/simple#accessing-the-state)
 
-There are plenty of examples online about setting up Firebase for Flutter so I will jump right into the code instead of walking thru the basics. 
+Now in part two we will integrate firebase into the application.
 
+>There are plenty of examples online about setting up Firebase for Flutter so I will jump right into the code instead of walking thru the basics. 
 >See [Google CodeLabs Flutter for Firebase](https://codelabs.developers.google.com/codelabs/flutter-firebase/index.html?index=..%2F..index#5) for step by step instructions for setting up you project on iOS or Android
 
-
 ### Create a Test User in Firebase
-Since we are just building the application and there is no functionalty to create users in the application right now, please login to you Firebase Console and add an user to your project. Please be sure to enable email authentication when updating the project in your Firebase Console.
+Since we are just building the application and there is no functionality to create users in the application right now, please login to your [Firebase Console]([https://console.firebase.google.com/u/0/](https://console.firebase.google.com/u/0/)) and add a user to your project. Please be sure to enable email authentication when updating the project in your Firebase Console.
 
+### Steps For Adding Firebase Functionality to the Project
+- Add the Firebase methods to the `AuthService`
+- Access the `getUser` property from the `AuthService` at startup to determine which page to load in `main.dart`
+- Modify `HomePage` to show email address of the logged in `FirebaseUser`
+- Modify `LoginPage` to call the `loginUser` method on the `AuthService` to login a user using the Firebase API to see if we can login a real  `FirebaseUser`
+- Finally handle the errors appropriately when logging in and when looking for a current user at startup
 
-### Cleaning Up the Default Flutter Project
-first lets create the project
-```
-flutter create simple_firebase_auth
-```
-Now lets do some project cleanup, open up the project and delete the existing `HomePage` and `HomePageState` widget from the file `main.dart`.
-
-Change the `home` property of the `MaterialApp` widget to point to the `LoginPage` widget we are about to create in the next section
-
-The file should look similar to this when completed
-```javascript
-import 'package:flutter/material.dart';
-import 'package:simple_firebase_auth/login_page.dart';
-
-void main() => runApp(MyApp());
-
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: LoginPage(),
-    );
-  }
-}
-```
-
-
-### Create the LoginPage Widget
-Lets walk through the creation of the `LoginPage` for the application. We need capture an `email` and a `password` to pass to the `AuthService` to call the login function.
-
-We are going to create a simple page with the required `TextFormField` widgets and one `RaisedButton` to click to make the login happen.
-
-1. Open your editor and create a new file in the `lib` directory named `login_page.dart`
-1. Paste the contents below into the file `login_page.dart`
-```javascript
-import 'package:flutter/material.dart';
-
-class LoginPage extends StatefulWidget {
-  @override
-  _LoginPageState createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Login Page Flutter Firebase"),
-      ),
-      body: Center(
-        child: Text('Login Page Flutter Firebase  Content'),
-      ),
-    );
-  }
-}
-
-```
-you should be able to run the code to see what the screen looks like now. Be sure to change the default route or `home` property in `main.dart` widget to `LoginPage` while we work through the UI so you can see the changes with live reload
-
-#### Style and Adding Text Fields
-
-Lets make the body of the page a centered `Column` with the childre of the column being primarily the `TextFormField`s and the `RaisedButton`
-
-the centered container to hold the form fields and buttons
-```javascript
-    body: Container(
-      padding: EdgeInsets.all(20.0),
-      child: Column()
-    )
-```
-Next add the actual form field widgets and the buttons as children of the `Column` widget. We will do some basic styling of the form fields so that this looks presentable. See the Flutter documentation for more information on [TextFormFields](https://api.flutter.dev/flutter/material/TextFormField-class.html)
-```javascript
-  body: Container(
-    padding: EdgeInsets.all(20.0),
-    child: Column(
-      children: <Widget>[
-        Text(
-          'Login Information',
-          style: TextStyle(fontSize: 20),
-        ),
-        TextFormField(
-            keyboardType: TextInputType.emailAddress,
-            decoration: InputDecoration(labelText: "Email Address")),
-        TextFormField(
-            obscureText: true,
-            decoration: InputDecoration(labelText: "Password")),
-        RaisedButton(child: Text("LOGIN"), onPressed: () {}),
-      ],
-    ),
-  ),
-```
-Lets add some spacing between the fields in the column so it is more presentable. We are going to use the `SizedBox` widget and set the `height` property to get some spacing in the application. Replace the `children` property of the `Column` widget to get the desired spacing
-```javascript
-  children: <Widget>[
-    SizedBox(height: 20.0),    // <= NEW
-    Text(
-      'Login Information',
-      style: TextStyle(fontSize: 20),
-    ),
-    SizedBox(height: 20.0),   // <= NEW
-    TextFormField(
-        keyboardType: TextInputType.emailAddress,
-        decoration: InputDecoration(labelText: "Email Address")),
-    TextFormField(
-        obscureText: true,
-        decoration: InputDecoration(labelText: "Password")),
-    SizedBox(height: 20.0),  // <= NEW
-    RaisedButton(child: Text("LOGIN"), onPressed: () {}),
-  ],
-```
-#### Getting Text Values from Form Fields
-We are going to be using a `Form` widget and a `GlobalKey`, additional information on these concepts can be found in the flutter cookbook section [Building a form with validation](https://flutter.dev/docs/cookbook/forms/validation)
-
-Add the formKey in the `LoginPage` widget
-```javascript
-class _LoginPageState extends State<LoginPage> {
-  final _formKey = GlobalKey<FormState>();
-```
-Then add two new fields to hold the email address and password values we will need to send to Firebase for authentication
-```javascript
-class _LoginPageState extends State<LoginPage> {
-  final _formKey = GlobalKey<FormState>();
-  String _password;
-  String _email;
-```
-Next we add a property `onSaved` to the `TextFormFields` we have for email and password, when the `save` method is called on the form, all of the widgets onSaved methods will be called to update the local variables.
-```javascript
-  TextFormField(
-      onSaved: (value) => _email = value,    // <= NEW
-      keyboardType: TextInputType.emailAddress,
-      decoration: InputDecoration(labelText: "Email Address")),
-  TextFormField(
-      onSaved: (value) => _password = value, // <= NEW
-      obscureText: true,
-      decoration: InputDecoration(labelText: "Password")),
-```
-Wrap the `Column` Widget with a new `Form` Widget, the code should look similar to this
-```javascript
-      body: Container(
-        padding: EdgeInsets.all(20.0),
-        child: Form(          // <= NEW
-          key: _formKey,      // <= NEW
-          child: Column(
-            children: <Widget>[
-            ....
-            ],
-          ),
-        ),
-      ),            
-```
-Now that the fields are set, the `TextFormField` are updated, we can using the `_formKey` to not only validate the fields provided, but to also get the values locally by calling the `save` method.
-
-Replace the code in the `RaisedButton` `onPressed` method to the following, and you will see that we are getting the values for email and password set in out widget. We can now pass these values to the `AuthService` that wraps the Firebase signin functionality.
-
-```javascript
-    // save the fields..
-    final form = _formKey.currentState;
-    form.save();
-
-    // Validate will return true if is valid, or false if invalid.
-    if (form.validate()) {
-      print("$_email $_password");
-    }
-```
-
-
-### Create the HomePage Widget
-For now, we will keep the home page simple since we are just trying to demonstrate how the flow works. Ignore the commented out `LogoutButton` widget, we will discuss that in a later section of the tutorial.
-
-1. Open your editor and create a new file in the `lib` directory named `home_page.dart`
-1. Paste the contents below into the file `home_page.dart`
-
-```javascript
-import 'package:flutter/material.dart';
-
-class HomePage extends StatefulWidget {
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  @override
-  Widget build(BuildContext context) {
-    return  Scaffold(
-      appBar: AppBar(
-        title: Text("Home Flutter Firebase"),
-        //actions: <Widget>[LogoutButton()],
-      ),
-      body: Center(
-        child: Text('Home Page Flutter Firebase  Content'),
-      ),
-    );
-  }
-}
-```
-3. Open `main.dart` and add the following import statement
-```javascript
-import 'home_page.dart';
-```
-4. Change the `home` property from this:
-```javascript
-home: HomePage(title: 'Flutter Demo Home Page'),
-```
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to this so you can verify that the page is working properly
-```javascript
-home: HomePage(),
-```
-### Creating a Template for An Authentication Service
-Here we will build out the authentication service separate from Firebase, validate that everything works and then integrate Firebase.
-
-In this service, we are using a mixin called `ChangeNotifier` and a method `notifyListeners`	 this will allow for the widgets that are using this Service to be updated when the method is called. We are calling  `notifyListeners`	 when we update the `currentUser` property because that means that the user has either logged in or logged out and we want the application to update based on the users state.
-
->More information on `Provider` and State Management can be found here in the [Flutter Documentation]([https://flutter.dev/docs/development/data-and-backend/state-mgmt/simple](https://flutter.dev/docs/development/data-and-backend/state-mgmt/simple))
-
-What we need as a baseline is the following:
-```javascript
+#### Authentication Service: Adding Firebase API Functionality
+First the authentication service which is where we are just wrapping some of the basic firebase functions that we need for authentication and determining if there is already a user persisted from a previous session
+```dart
+import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
-import 'package:flutter/material.dart';
+
+import 'package:flutter/cupertino.dart';
 
 class AuthService with ChangeNotifier {
-  var currentUser;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  AuthService() {
-    print("new AuthService");
-  }
-
-  Future getUser() {
-    return Future.value(currentUser);
-  }
-
-  // wrappinhg the firebase calls
-  Future logout() {
-    this.currentUser = null;
-    notifyListeners();
-    return Future.value(currentUser);
+  ///
+  /// return the Future with firebase user object FirebaseUser if one exists
+  ///
+  Future<FirebaseUser> getUser() {
+    return _auth.currentUser();
   }
 
   // wrapping the firebase calls
-  Future createUser(
-      {String firstName,
-      String lastName,
-      String email,
-      String password}) async {}
-
-  // logs in the user if password matches
-  Future loginUser({String email, String password}) {
-    if (password == 'password123') {
-      this.currentUser = {'email': email};
+  Future logout() async {
+    var result = FirebaseAuth.instance.signOut();
+    notifyListeners();
+    return result;
+  }
+  
+  ///
+  /// wrapping the firebase call to signInWithEmailAndPassword
+  /// `email` String
+  /// `password` String
+  ///
+  Future<FirebaseUser> loginUser({String email, String password}) async {
+    try {
+      var result = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+      // since something changed, let's notify the listeners...
       notifyListeners();
-      return Future.value(currentUser);
-    } else {
-      this.currentUser = null;
-      return Future.value(null);
+      return result;
+    }  catch (e) {
+      // throw the Firebase AuthException that we caught
+      throw new AuthException(e.code, e.message);
     }
   }
 }
+
 ```
-We will keep a local property in the service call `currentUser` which is the object storing the user, when the user calls the `login` method, if the password matches we will set  `currentUser`  and the user will be logged in. This will now provide a user when the call is made to `getUser` method. For logging the user out, we will set the `currentUser`property to null indicating that we are no longer logged into the system.
+As you can see from the code above, we still have the same methods for accessing our `AuthService` the only difference now is that we have replaces the call with real calls to the Firebase backend that you have set up.
 
+Notice we no longer need to keep a property with the current user since Firebase will manage that for us. All we need to do is call the method `getUser` and if there is a user we will get an object, otherwise it will return null.
 
-### Determining User State On Application Launch
-The first challenge when working with the application is to determine which page to open when the application starts up. What we want to do here is determine if we have a user or not. We will be using an `AuthService` we will created above combined with the `FutureBuilder` widget from flutter to render the correct first page of either a `HomePage` or a `LoginPage`
+Most important to notice is that we are calling `notifyListeners()` when the login state is changing during logging in or logging out.
 
-#### Using the Provider
-In `main.dart` we will need to update the default `main` method to look like this; we are wrapping the whole application with the `ChangeNotifierProvider`  to get the ability to scan up the widget tree and find an object of type `AuthService`.
-
-```javascript
-void main() => runApp(
-      ChangeNotifierProvider<AuthService>(
-        child: MyApp(),
-        builder: (BuildContext context) {
-          return AuthService();
-        },
-      ),
-    );
- ```
- 
-#### Modifying the  MyApp Widget
-Go into the `main.dart`  and make the following changes that will allow the `MyApp` Widget to set the route. This widget will determine if the application should navigate to the 	`HomePage` widget or `LoginPage` widget when the app is launched.
-
-```javascript
+#### Modifying `main.dart`
+There are no real modifications needed to the file since we are working with the same external API, the only difference is that now we are returning a `FirebaseUser` object so let's add a specific type to the code, and touch up a few more things
+```dart
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
@@ -311,16 +85,21 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: FutureBuilder(
-        // get the Provider, and call the getUser method
+      home: FutureBuilder<FirebaseUser>(
         future: Provider.of<AuthService>(context).getUser(),
-        // wait for the future to resolve and render the appropriate
-        // widget for HomePage or LoginPage
-        builder: (context, AsyncSnapshot snapshot) {
+        builder: (context, AsyncSnapshot<FirebaseUser> snapshot) { //          ⇐ NEW
           if (snapshot.connectionState == ConnectionState.done) {
-            return snapshot.hasData ? HomePage() : LoginPage();
+            // log error to console                                            ⇐ NEW
+            if (snapshot.error != null) {
+              print("error");
+              return Text(snapshot.error.toString());
+            }
+            // redirect to the proper page, pass the user into the 
+            // `HomePage` so we can display the user email in welcome msg     ⇐ NEW
+            return snapshot.hasData ? HomePage(snapshot.data) : LoginPage();
           } else {
-            return Container(color: Colors.white);
+            // show loading indicator                                         ⇐ NEW
+            return LoadingCircle();
           }
         },
       ),
@@ -328,21 +107,112 @@ class MyApp extends StatelessWidget {
   }
 }
 ```
+We have added the object type, `FirebaseUser`, associated with the `AsyncSnapshot` and we are now checking for an error in case there is a problem loading Firebase initially.
 
-### Modifying the LoginPage Widget
-Now that the `AuthService` can be accessed using the Provider, we can call the login function when the used clicks the button. Go and open the file `login_page.dart` and find the `onPressed` method for the login button and make the following change
+We have also added a new parameter to the constructor of the `HomePage` widget which is the `FirebaseUser` object returned from `getUser` call made to the `AuthService`. We will a see in the next section how the new parameter is used.
 
+Finally we added a new widget called `LoadingCircle` to give us a nice user experience when the application is starting up and accessing `Firebase` to check for a new user; See the code below for the `LoadingCircle` widget.
+> See documentation on [`CircularProgressIndicator` ]([https://api.flutter.dev/flutter/material/CircularProgressIndicator/CircularProgressIndicator.html](https://api.flutter.dev/flutter/material/CircularProgressIndicator/CircularProgressIndicator.html))
 ```dart
-    // Validate will return true if is valid, or false if invalid.
-    if (form.validate()) {
-      var result = await Provider.of<AuthService>(context)
-          .loginUser(email: _email, password: _password);
-      if (result == null) {
-        // see project in github for this code
-        //return _buildShowErrorDialog(context,
-        //    "Error Logging In With Those Credentials");
-      }
-    }
+class LoadingCircle extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        child: CircularProgressIndicator(),
+        alignment: Alignment(0.0, 0.0),
+      ),
+    );
+  }
+}
 ```
-We are using the `Provider.of` method to look up the widget tree and get our `AuthService` and then we have access to all of the methods, specifically the `loginUser` method.
+#### Modifying HomePage Widget in  `home_page.dart`
+We need to first modify the widget by adding a new constructor that will hold the firebase user passed in from the FutureBuilder in `main.dart`
+```dart
+class HomePage extends StatefulWidget {
+  final FirebaseUser currentUser;    // ⇐ NEW
 
+  HomePage(this.currentUser);        // ⇐ NEW
+
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+```
+Now we have access to the information on the current user from the widget; we can access it when rendering the `HomePage` by make the modifications you see below. We will just add a few more widgets to the build method:
+```dart
+     children: <Widget>[
+       SizedBox(height: 20.0),                         // ⇐ NEW
+       Text(                                           // ⇐ NEW
+         'Home Page Flutter Firebase  Content',
+         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+       ),
+       SizedBox(height: 20.0),                         // ⇐ NEW
+       Text(                                           // ⇐ NEW
+          `Welcome ${widget.currentUser.email}`,
+           style: TextStyle(    
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              fontStyle: FontStyle.italic),
+        ),
+       SizedBox(height: 20.0),
+       RaisedButton(
+           child: Text("LOGOUT"),
+           onPressed: () async {
+             await Provider.of<AuthService>(context).logout();
+           })
+     ],
+```
+#### Modifying LoginPage Widget in  `login_page.dart`
+Since the API signature hasn't changed we need to do very little to this function to get the desired results, however it would be best to do some better error checking.
+
+With `Future` we need to wrap the call with a `try` `catch` block since any errors that happen with Firebase will be thrown as exceptions. We then will display the error message in a dialog, see code for the method `_buildErrorDialog` and the rest of the changes below.
+
+Add the new import for the error exception
+```dart
+import  'package:firebase_auth/firebase_auth.dart';
+```
+Make the appropriate changes to the `onPressed` method of the login button.
+```dart
+     onPressed: () async {
+       // save the fields..
+       final form = _formKey.currentState;
+       form.save();
+
+       // Validate will return true if is valid, or false if invalid.
+       if (form.validate()) {
+         try {
+           FirebaseUser result =
+               await Provider.of<AuthService>(context).loginUser(
+                   email: _email, password: _password);
+           print(result);  
+         } on AuthException catch (error) {
+           // handle the firebase specific error
+           return _buildErrorDialog(context, error.message);
+         } on Exception catch (error) {
+           // gracefully handle anything else that might happen..        
+           return _buildErrorDialog(context, error.toString());
+         }
+       }
+     },
+```
+Add the code for the new private `_buildErrorDialog` method that will display errors from the call to the `AuthService` login method.
+```dart 
+  Future _buildErrorDialog(BuildContext context, _message) {
+    return showDialog(
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Error Message'),
+          content: Text(_message),
+          actions: <Widget>[
+            FlatButton(
+                child: Text('Cancel'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                })
+          ],
+        );
+      },
+      context: context,
+    );
+  }
+```
