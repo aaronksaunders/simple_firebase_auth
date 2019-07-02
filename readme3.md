@@ -1,3 +1,7 @@
+<p style="display: block; margin-left: auto;margin-right: auto; width: 10%">
+    <img src="screenshots/Screenshot_20190701-235104.jpg" width="300"/>
+</p>
+
 ### New Packages used
 *   cloud_firestore: 0.12.5+2 - to save data to firestorm
 *   image_picker:  0.6.0+10 - pick an image from the phone gallery or from camera
