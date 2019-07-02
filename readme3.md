@@ -1,5 +1,5 @@
-<p style="display: block; margin-left: auto;margin-right: auto; width: 10%">
-    <img src="screenshots/Screenshot_20190701-235104.jpg" width="300"/>
+<p align="center">
+    <img src="screenshots/Screenshot_20190701-235104.jpg" width=300>
 </p>
 
 ### New Packages used
