@@ -9,8 +9,12 @@
 *   path_provider: 1.1.0 - get device path information for manipulating the image file
 
 ### New Widgets Created
+* ImageSelectAndUpload - contains a button bar, see below, and an Image Widget and manages the state of the selected image and associated thumbnail.
 * FileUploadButtonBar - a button bar containing a button for selecting the file, uploading the file and one for reseting the currently selected file.
 * ImageList - list specific information regarding the images in the list
+<p align="center">
+    <img src="screenshots/Widget%20Overview%20Diagram.jpg" >
+</p>
 
 ### Application Flow
 1. query images collection in firebase to get documents
