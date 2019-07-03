@@ -36,9 +36,10 @@ class ImageService with ChangeNotifier {
     return Future.value(f);
   }
 
-  uploadTheFile(Map<String, File> _imageInfo,
+  Future<dynamic> uploadTheFile(Map<String, File> _imageInfo,
       Function _updateCallback(StorageTaskSnapshot _progress)) async {
     var downloadURL;
+    var value;
 
     // get current user
     var currentUser = await FirebaseAuth.instance.currentUser();
@@ -75,7 +76,7 @@ class ImageService with ChangeNotifier {
         downloadURL = await _event.snapshot.ref.getDownloadURL();
 
         // upload to image collection
-        var result = await Firestore.instance.collection('Images').add({
+        value = await Firestore.instance.collection('Images').add({
           'image': downloadURL,
           'thumb': base64Image,
           'owner_id': currentUser.uid,
@@ -85,11 +86,9 @@ class ImageService with ChangeNotifier {
       } else if (_event.type == StorageTaskEventType.failure) {
         print(_event.snapshot.error);
       }
-    }, onDone: () async {
-      print("onDone");
-    }, onError: (_error) {
-      print(_error);
     });
+
+    return await uploadTask.onComplete;
   }
 
   makeThumbFromDoc(DocumentSnapshot document) {

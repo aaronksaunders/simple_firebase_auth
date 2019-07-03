@@ -87,12 +87,20 @@ class _ImageSelectAndUploadState extends State<ImageSelectAndUpload> {
       FileUploadButtonBar(
         imageFile: imageThumb,
         onUploadFile: () async {
-          ImageService().uploadTheFile({
+          final v = await ImageService().uploadTheFile({
             'imageThumb': imageThumb,
             'image': image
           }, // information for file upload
               (_progress) {
             print(_progress.bytesTransferred / _progress.totalByteCount);
+          });
+
+          print(v);
+
+          // clear UI
+          setState(() {
+            imageThumb = null;
+            image = null;
           });
         },
         onChangeFile: (Map<String, File> _imageInfo) {
