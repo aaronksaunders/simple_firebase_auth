@@ -1,17 +1,43 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:typed_data';
+
+import 'package:flutter/cupertino.dart';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-
-import 'package:flutter/cupertino.dart';
-
- 
+import 'package:image/image.dart' as ImagePlugin;
+import 'package:path_provider/path_provider.dart';
 
 class ImageService with ChangeNotifier {
- 
-  uploadTheFile(Map<String,File> _imageInfo, Function _updateCallback(StorageTaskSnapshot _progress)) async {
+  get imageDataStream {
+    return Firestore.instance.collection('Images').snapshots();
+  }
+
+  Future<File> createThumbFileFromImageFile(
+    File _imageFile,
+  ) async {
+    // load file into memory so we can resize it for the thumb
+    var image =
+        ImagePlugin.decodeImage(File(_imageFile.path).readAsBytesSync());
+    // resize into thumb
+    var thumbnail = ImagePlugin.copyResize(image, width: 240);
+
+    // create file path to save thumbnail
+    var docPath = (await getApplicationDocumentsDirectory()).path;
+    var tstamp = DateTime.now().millisecondsSinceEpoch.toString();
+    var fileName = '$docPath/thumbnail-test-$tstamp.png';
+
+    // save the thumbnail
+    var f = new File(fileName);
+
+    f.writeAsBytesSync(ImagePlugin.encodePng(thumbnail));
+    return Future.value(f);
+  }
+
+  uploadTheFile(Map<String, File> _imageInfo,
+      Function _updateCallback(StorageTaskSnapshot _progress)) async {
     var downloadURL;
 
     // get current user
@@ -64,5 +90,18 @@ class ImageService with ChangeNotifier {
     }, onError: (_error) {
       print(_error);
     });
+  }
+
+  makeThumbFromDoc(DocumentSnapshot document) {
+    if (document['thumb'] != null) {
+      Uint8List thumbBytes = base64Decode(document['thumb']);
+      return SizedBox(
+          width: 100.0, height: 100.0, child: Image.memory(thumbBytes));
+    } else {
+      return SizedBox(
+        width: 100.0,
+        height: 100.0,
+      );
+    }
   }
 }

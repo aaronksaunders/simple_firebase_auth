@@ -2,14 +2,15 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:image_picker/image_picker.dart';
-import 'package:image/image.dart' as ImagePlugin;
-import 'package:path_provider/path_provider.dart';
+// import 'package:image/image.dart' as ImagePlugin;
+// import 'package:path_provider/path_provider.dart';
+import 'package:simple_firebase_auth/ImageService.dart';
 
 class FileUploadButtonBar extends StatelessWidget {
   const FileUploadButtonBar({
     Key key,
     @required this.onChangeFile,
-    @required this.imageFile, 
+    @required this.imageFile,
     @required this.onUploadFile,
   }) : super(key: key);
 
@@ -26,30 +27,16 @@ class FileUploadButtonBar extends StatelessWidget {
             // pick the image
             var pickedImage =
                 await ImagePicker.pickImage(source: ImageSource.gallery);
+            if (pickedImage == null) return;
 
-            // load file into memory so we can resize it for the thumb
-            var image = ImagePlugin.decodeImage(
-                File(pickedImage.path).readAsBytesSync());
-            // resize into thumb
-            var thumbnail = ImagePlugin.copyResize(image, width: 240);
-
-            // create file path to save thumbnail
-            var docPath = (await getApplicationDocumentsDirectory()).path;
-            var tstamp = DateTime.now().millisecondsSinceEpoch.toString();
-            var fileName = '$docPath/thumbnail-test-$tstamp.png';
-
-            // save the thumbnail
-            new File(fileName)
-              ..writeAsBytesSync(ImagePlugin.encodePng(thumbnail));
+            final thumbFile =
+                await ImageService().createThumbFileFromImageFile(pickedImage);
 
             // delete any old thumb...
             if (imageFile != null) await imageFile.delete();
 
             // return the information to parent
-            onChangeFile({
-              'thumb': new File(fileName),
-              'file': new File(pickedImage.path)
-            });
+            onChangeFile({'thumb': thumbFile, 'file': File(pickedImage.path)});
           }),
       RaisedButton(
           child: Icon(Icons.file_upload),

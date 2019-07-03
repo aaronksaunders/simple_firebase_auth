@@ -46,35 +46,56 @@ class _HomePageState extends State<HomePage> {
                   fontStyle: FontStyle.italic),
             ),
             SizedBox(height: 20.0),
-            // Box to hold the thumb of the image, if nothing then
-            // show empty container
-            imageThumb != null
-                ? SizedBox(height: 100.0, child: Image.file(imageThumb))
-                : new Container(),
-            // button bar to get the image
-            FileUploadButtonBar(
-              imageFile: imageThumb,
-              onUploadFile: () async {
-                ImageService().uploadTheFile({
-                  'imageThumb': imageThumb,
-                  'image': image
-                }, // information for file upload
-                    (_progress) {
-                  print(_progress.bytesTransferred / _progress.totalByteCount);
-                });
-              },
-              onChangeFile: (Map<String, File> _imageInfo) {
-                setState(() {
-                  imageThumb = _imageInfo['thumb'];
-                  image = _imageInfo['file'];
-                });
-              },
-            ),
+            ImageSelectAndUpload(),
             SizedBox(height: 20.0),
             Expanded(child: ImageList())
           ],
         ),
       ),
     );
+  }
+}
+
+class ImageSelectAndUpload extends StatefulWidget {
+  const ImageSelectAndUpload({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  _ImageSelectAndUploadState createState() => _ImageSelectAndUploadState();
+}
+
+class _ImageSelectAndUploadState extends State<ImageSelectAndUpload> {
+  File imageThumb;
+  File image;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(children: [
+      // Box to hold the thumb of the image, if nothing then
+      // show empty container
+      imageThumb != null
+          ? SizedBox(height: 100.0, child: Image.file(imageThumb))
+          : new Container(),
+      // button bar to get the image
+      FileUploadButtonBar(
+        imageFile: imageThumb,
+        onUploadFile: () async {
+          ImageService().uploadTheFile({
+            'imageThumb': imageThumb,
+            'image': image
+          }, // information for file upload
+              (_progress) {
+            print(_progress.bytesTransferred / _progress.totalByteCount);
+          });
+        },
+        onChangeFile: (Map<String, File> _imageInfo) {
+          setState(() {
+            imageThumb = _imageInfo['thumb'];
+            image = _imageInfo['file'];
+          });
+        },
+      )
+    ]);
   }
 }
