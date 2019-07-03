@@ -32,7 +32,7 @@ class ImageList extends StatelessWidget {
               return ListView(
                   shrinkWrap: false,
                   children: documents.map((DocumentSnapshot document) {
-                    var thumb = ImageService().makeThumbFromDoc(document);
+                    final thumb = ImageService().makeThumbFromDoc(document);
 
                     return new ListTile(
                       key: Key(document['uid']),

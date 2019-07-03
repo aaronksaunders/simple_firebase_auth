@@ -38,6 +38,7 @@ class _HomePageState extends State<HomePage> {
       body: Center(
         child: Column(
           children: <Widget>[
+            SizedBox(height: 10.0),
             Text(
               'Welcome ${widget.currentUser.email}',
               style: TextStyle(
@@ -45,9 +46,7 @@ class _HomePageState extends State<HomePage> {
                   fontWeight: FontWeight.bold,
                   fontStyle: FontStyle.italic),
             ),
-            SizedBox(height: 20.0),
             ImageSelectAndUpload(),
-            SizedBox(height: 20.0),
             Expanded(child: ImageList())
           ],
         ),
@@ -74,9 +73,16 @@ class _ImageSelectAndUploadState extends State<ImageSelectAndUpload> {
     return Column(children: [
       // Box to hold the thumb of the image, if nothing then
       // show empty container
-      imageThumb != null
-          ? SizedBox(height: 100.0, child: Image.file(imageThumb))
-          : new Container(),
+      AnimatedContainer(
+        height: (imageThumb != null ? 120.0 : 0),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: imageThumb != null
+              ? SizedBox(height: 100.0, child: Image.file(imageThumb))
+              : new Container(),
+        ),
+        duration: Duration(milliseconds: 300),
+      ),
       // button bar to get the image
       FileUploadButtonBar(
         imageFile: imageThumb,
