@@ -36,6 +36,15 @@ class ImageService with ChangeNotifier {
     return Future.value(f);
   }
 
+  ///
+  /// [ _imageInfo ] this is a map containing two file objects the file
+  ///  to upload and the thumbnail version of the file which can be 
+  /// used for rendering in a list
+  /// 
+  /// [ _progress ] is a function call back that return the `StorageTaskSnapshot`
+  /// object from the Firebase task; this can be used for providing and 
+  /// update on the upload process
+  /// 
   Future<dynamic> uploadTheFile(Map<String, File> _imageInfo,
       Function _updateCallback(StorageTaskSnapshot _progress)) async {
     var downloadURL;
