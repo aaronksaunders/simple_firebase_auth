@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -11,16 +12,25 @@ import 'components/ImageList.dart';
 
 class HomePage extends StatefulWidget {
   final FirebaseUser currentUser;
+  Stream<QuerySnapshot> courseDocStream;
 
-  HomePage(this.currentUser);
+  HomePage({
+    Key key,
+    @required this.currentUser,
+  }) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
-  File imageThumb;
-  File image;
+class _HomePageState extends State<HomePage>
+    with AutomaticKeepAliveClientMixin<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    widget.courseDocStream = ImageService().imageDataStream;
+    print("initState - home_page");
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,12 +57,24 @@ class _HomePageState extends State<HomePage> {
                   fontStyle: FontStyle.italic),
             ),
             ImageSelectAndUpload(),
-            Expanded(child: ImageList())
+            Expanded(
+                child: ImageList(
+                    listStream: widget.courseDocStream,
+                    onItemClick: (_item, _tag) {
+                      print(_item);
+                      Navigator.push(context, MaterialPageRoute(builder: (_) {
+                        return DetailScreen(_item, _tag);
+                      }));
+                    }))
           ],
         ),
       ),
     );
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }
 
 class ImageSelectAndUpload extends StatefulWidget {
@@ -111,5 +133,35 @@ class _ImageSelectAndUploadState extends State<ImageSelectAndUpload> {
         },
       )
     ]);
+  }
+}
+
+class DetailScreen extends StatelessWidget {
+  final String item;
+  final String tag;
+
+  DetailScreen(this.item, this.tag);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: GestureDetector(
+        child: Center(
+          child: FutureBuilder(
+              future: precacheImage(NetworkImage(this.item), context),
+              builder: (context, snapshot) {
+                return Hero(
+                  tag: this.tag,
+                  child: Image.network(
+                    this.item,
+                  ),
+                );
+              }),
+        ),
+        onTap: () {
+          Navigator.pop(context);
+        },
+      ),
+    );
   }
 }

@@ -3,14 +3,27 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:simple_firebase_auth/ImageService.dart';
 
-class ImageList extends StatelessWidget {
+class ImageList extends StatefulWidget {
+  const ImageList({
+    Key key,
+    @required this.onItemClick,
+    @required this.listStream,
+  }) : super(key: key);
+
+  final void Function(String, String) onItemClick;
+  final Stream listStream;
+
+  @override
+  _ImageListState createState() => _ImageListState();
+}
+
+class _ImageListState extends State<ImageList> {
   @override
   Widget build(BuildContext context) {
-    // get the stream of image Items
-    var courseDocStream = ImageService().imageDataStream;
+    print("build - ImageList");
 
     return StreamBuilder<QuerySnapshot>(
-        stream: courseDocStream,
+        stream: widget.listStream,
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           print(snapshot.connectionState);
 
@@ -32,18 +45,14 @@ class ImageList extends StatelessWidget {
               return ListView(
                   shrinkWrap: false,
                   children: documents.map((DocumentSnapshot document) {
-                    final thumb = ImageService().makeThumbFromDoc(document);
-
-                    return new ListTile(
-                      key: Key(document['uid']),
-                      title: new Text(document['subject']),
-                      subtitle: new Text(document['owner']),
-                      leading: thumb,
+                    return new ImageListItem(
+                      document: document,
+                      widget: widget,
                     );
                   }).toList());
             }
-          } 
-          
+          }
+
           if (snapshot.connectionState != ConnectionState.done) {
             return Align(
               widthFactor: 200.0,
@@ -55,6 +64,33 @@ class ImageList extends StatelessWidget {
             );
           }
         });
+  }
+}
+
+class ImageListItem extends StatelessWidget {
+  const ImageListItem({
+    Key key,
+    @required this.document,
+    @required this.widget,
+  }) : super(key: key);
+
+  final document;
+  final ImageList widget;
+
+  @override
+  Widget build(BuildContext context) {
+    final thumb = ImageService().makeThumbFromDoc(document);
+    final heroTag = 'imageHero-${document.documentID}';
+
+    return new ListTile(
+      key: Key(document.documentID),
+      title: new Text(document['subject']),
+      subtitle: new Text(document['owner']),
+      leading: Hero(tag: heroTag, child: thumb),
+      onTap: () {
+        widget.onItemClick(document['image'], heroTag);
+      },
+    );
   }
 }
 

@@ -25,14 +25,16 @@ class MyApp extends StatelessWidget {
         future: Provider.of<AuthService>(context).getUser(),
         builder: (context, AsyncSnapshot<FirebaseUser> snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
-            // log error to console 
-            if (snapshot.error != null) { 
+            // log error to console
+            if (snapshot.error != null) {
               print("error");
               return Text(snapshot.error.toString());
             }
 
             // redirect to the proper page
-            return snapshot.hasData ? HomePage(snapshot.data) : LoginPage();
+            return snapshot.hasData
+                ? HomePage(currentUser: snapshot.data)
+                : LoginPage();
           } else {
             // show loading indicator
             return LoadingCircle();

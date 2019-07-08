@@ -11,7 +11,7 @@ import 'package:image/image.dart' as ImagePlugin;
 import 'package:path_provider/path_provider.dart';
 
 class ImageService with ChangeNotifier {
-  get imageDataStream {
+  Stream<QuerySnapshot> get imageDataStream {
     return Firestore.instance.collection('Images').snapshots();
   }
 
@@ -38,13 +38,13 @@ class ImageService with ChangeNotifier {
 
   ///
   /// [ _imageInfo ] this is a map containing two file objects the file
-  ///  to upload and the thumbnail version of the file which can be 
+  ///  to upload and the thumbnail version of the file which can be
   /// used for rendering in a list
-  /// 
+  ///
   /// [ _progress ] is a function call back that return the `StorageTaskSnapshot`
-  /// object from the Firebase task; this can be used for providing and 
+  /// object from the Firebase task; this can be used for providing and
   /// update on the upload process
-  /// 
+  ///
   Future<dynamic> uploadTheFile(Map<String, File> _imageInfo,
       Function _updateCallback(StorageTaskSnapshot _progress)) async {
     var downloadURL;
