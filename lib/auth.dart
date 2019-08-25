@@ -46,7 +46,7 @@ class AuthService with ChangeNotifier {
           .signInWithEmailAndPassword(email: email, password: password);
       // since something changed, let's notify the listeners...
       notifyListeners();
-      return result;
+      return result.user;
     }  catch (e) {
       throw new AuthException(e.code, e.message);
     }
